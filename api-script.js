@@ -2,11 +2,10 @@
 const API_URL = 'https://forkshop-api.onrender.com/api';
 
 // ===== ÉTAT GLOBAL API =====
-// NOTE: On ne redéclare PAS cart, wishlist, etc. car script.js les déclare déjà
+// NOTE: On ne redéclare PAS cart, wishlist, appliedPromo, etc. car script.js les déclare déjà
 // On utilise les variables globales de script.js (window.cart, window.wishlist, etc.)
 let currentUser = null;
 let authToken = localStorage.getItem('authToken') || null;
-let appliedPromo = null;
 
 // Codes promo valides (maintenant aussi côté client pour validation)
 const promoCodes = {
@@ -527,14 +526,15 @@ async function handleCheckoutSubmitAPI(e) {
         }
     };
 
-    // Appliquer la réduction si code promo
-    if (appliedPromo) {
-        if (appliedPromo.type === 'percentage') {
-            orderData.discount = orderData.subtotal * (appliedPromo.discount / 100);
+    // Appliquer la réduction si code promo (utiliser variable globale de script.js)
+    const promo = window.appliedPromo;
+    if (promo) {
+        if (promo.type === 'percentage') {
+            orderData.discount = orderData.subtotal * (promo.discount / 100);
         } else {
-            orderData.discount = appliedPromo.discount;
+            orderData.discount = promo.discount;
         }
-        orderData.promoCode = appliedPromo.code;
+        orderData.promoCode = promo.code;
     }
 
     orderData.total = orderData.subtotal - orderData.discount;
