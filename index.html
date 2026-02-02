@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForkShop - Votre boutique de fourchettes d'exception</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <span class="fork-icon">🍴</span>
+                <h1>ForkShop</h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#accueil" class="nav-link active">Accueil</a></li>
+                <li><a href="#catalogue" class="nav-link">Catalogue</a></li>
+                <li><a href="#blog" class="nav-link">Blog</a></li>
+                <li><a href="#faq" class="nav-link">FAQ</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="header-actions">
+                <!-- Toggle Mode Sombre -->
+                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                    <span class="sun-icon">☀️</span>
+                    <span class="moon-icon">🌙</span>
+                </button>
+
+                <!-- Icône Favoris -->
+                <div class="wishlist-icon" id="wishlist-icon">
+                    <span class="wishlist-count">0</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                </div>
+
+                <!-- Icône Panier -->
+                <div class="cart-icon" id="cart-icon">
+                    <span class="cart-count">0</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="accueil">
+        <div class="hero-content" data-parallax>
+            <h2 class="hero-title">L'Excellence à Chaque Bouchée</h2>
+            <p class="hero-subtitle">Découvrez notre collection exclusive de fourchettes artisanales</p>
+            <a href="#catalogue" class="cta-button">Explorer la collection</a>
+        </div>
+        <div class="hero-image" data-parallax>
+            <div class="hero-placeholder">
+                <span class="hero-icon">🍴</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="features-container">
+            <div class="feature-card" data-scroll-reveal>
+                <div class="feature-icon">✨</div>
+                <h3>Qualité Premium</h3>
+                <p>Matériaux nobles et finitions impeccables</p>
+            </div>
+            <div class="feature-card" data-scroll-reveal>
+                <div class="feature-icon">🎨</div>
+                <h3>Design Unique</h3>
+                <p>Collections exclusives créées par des artisans</p>
+            </div>
+            <div class="feature-card" data-scroll-reveal>
+                <div class="feature-icon">🚚</div>
+                <h3>Livraison Rapide</h3>
+                <p>Expédition soignée sous 48h</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Catalogue Section -->
+    <section class="catalogue" id="catalogue">
+        <div class="catalogue-header">
+            <h2>Notre Catalogue</h2>
+
+            <!-- Barre de recherche -->
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Rechercher une fourchette..." />
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+            </div>
+
+            <!-- Contrôles de vue et tri -->
+            <div class="catalogue-controls">
+                <div class="filters">
+                    <button class="filter-btn active" data-filter="all">Toutes</button>
+                    <button class="filter-btn" data-filter="inox">Inox</button>
+                    <button class="filter-btn" data-filter="argent">Argent</button>
+                    <button class="filter-btn" data-filter="bois">Bois</button>
+                </div>
+
+                <div class="view-sort-controls">
+                    <select id="sort-select" class="sort-select">
+                        <option value="default">Trier par...</option>
+                        <option value="price-asc">Prix croissant</option>
+                        <option value="price-desc">Prix décroissant</option>
+                        <option value="name-asc">Nom A-Z</option>
+                        <option value="rating-desc">Meilleures notes</option>
+                        <option value="popular">Popularité</option>
+                    </select>
+
+                    <div class="view-toggle">
+                        <button class="view-btn active" data-view="grid" title="Vue grille">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                            </svg>
+                        </button>
+                        <button class="view-btn" data-view="list" title="Vue liste">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="8" y1="6" x2="21" y2="6"></line>
+                                <line x1="8" y1="12" x2="21" y2="12"></line>
+                                <line x1="8" y1="18" x2="21" y2="18"></line>
+                                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bouton comparateur -->
+            <button class="compare-btn" id="compare-btn" style="display: none;">
+                Comparer (<span id="compare-count">0</span>)
+            </button>
+        </div>
+
+        <div class="products-grid" id="products-grid">
+            <!-- Les produits seront injectés ici via JavaScript -->
+        </div>
+    </section>
+
+    <!-- Section Blog -->
+    <section class="blog-section" id="blog">
+        <div class="blog-container">
+            <h2>Le Blog de la Fourchette</h2>
+            <p class="blog-subtitle">Découvrez l'art de la table et nos conseils d'experts</p>
+
+            <div class="blog-grid">
+                <article class="blog-card" data-scroll-reveal>
+                    <div class="blog-image">📖</div>
+                    <div class="blog-content">
+                        <span class="blog-date">15 Janvier 2024</span>
+                        <h3>Histoire de la fourchette à travers les âges</h3>
+                        <p>De l'antiquité à nos jours, découvrez l'évolution fascinante de cet ustensile indispensable...</p>
+                        <a href="#" class="blog-link">Lire la suite →</a>
+                    </div>
+                </article>
+
+                <article class="blog-card" data-scroll-reveal>
+                    <div class="blog-image">🍽️</div>
+                    <div class="blog-content">
+                        <span class="blog-date">10 Janvier 2024</span>
+                        <h3>Comment choisir la fourchette idéale</h3>
+                        <p>Nos experts vous guident dans le choix du matériau, du design et de la taille parfaite...</p>
+                        <a href="#" class="blog-link">Lire la suite →</a>
+                    </div>
+                </article>
+
+                <article class="blog-card" data-scroll-reveal>
+                    <div class="blog-image">✨</div>
+                    <div class="blog-content">
+                        <span class="blog-date">5 Janvier 2024</span>
+                        <h3>Entretien : faire briller vos fourchettes</h3>
+                        <p>Techniques et astuces pour préserver l'éclat de vos fourchettes en argent et inox...</p>
+                        <a href="#" class="blog-link">Lire la suite →</a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section FAQ -->
+    <section class="faq-section" id="faq">
+        <div class="faq-container">
+            <h2>Questions Fréquentes</h2>
+
+            <div class="faq-list">
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Quels matériaux utilisez-vous pour vos fourchettes ?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Nous utilisons exclusivement des matériaux de haute qualité : acier inoxydable 18/10, argent massif 925, et bois nobles comme l'olivier et le noyer. Tous nos produits sont certifiés pour un usage alimentaire.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Quelle est la durée de garantie ?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Toutes nos fourchettes bénéficient d'une garantie de 5 ans contre tout défaut de fabrication. Les fourchettes en argent massif sont garanties à vie.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Comment entretenir mes fourchettes en argent ?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Lavez-les à la main avec un savon doux, séchez immédiatement. Pour le polissage, utilisez un chiffon spécial argent. Évitez le lave-vaisselle qui peut ternir l'argent.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Proposez-vous la livraison internationale ?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Oui, nous livrons dans toute l'Europe sous 5-7 jours ouvrés. Pour les autres destinations, contactez notre service client pour un devis personnalisé.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">
+                        <span>Puis-je retourner un produit ?</span>
+                        <span class="faq-icon">+</span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Vous disposez de 30 jours pour retourner tout produit non personnalisé, dans son emballage d'origine. Le remboursement est effectué sous 5 jours ouvrés.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Newsletter -->
+    <section class="newsletter-section">
+        <div class="newsletter-container">
+            <h2>Restez informé</h2>
+            <p>Inscrivez-vous à notre newsletter pour recevoir nos offres exclusives et nouveautés</p>
+            <form class="newsletter-form" id="newsletter-form">
+                <input type="email" placeholder="Votre adresse email" required>
+                <button type="submit" class="cta-button">S'inscrire</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>ForkShop</h3>
+                <p>Votre spécialiste en fourchettes d'exception depuis 2024</p>
+            </div>
+            <div class="footer-section">
+                <h4>Contact</h4>
+                <p>Email: contact@forkshop.fr</p>
+                <p>Tél: +33 1 23 45 67 89</p>
+            </div>
+            <div class="footer-section">
+                <h4>Suivez-nous</h4>
+                <div class="social-links">
+                    <a href="#">Facebook</a>
+                    <a href="#">Instagram</a>
+                    <a href="#">Pinterest</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 ForkShop. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <!-- Modal Panier -->
+    <div class="modal" id="cart-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Votre Panier</h2>
+            <div id="cart-items"></div>
+
+            <!-- Code promo -->
+            <div class="promo-code-section">
+                <input type="text" id="promo-input" placeholder="Code promo">
+                <button id="apply-promo" class="apply-promo-btn">Appliquer</button>
+            </div>
+            <div id="promo-message" class="promo-message"></div>
+
+            <div class="cart-summary">
+                <div class="cart-line">
+                    <span>Sous-total:</span>
+                    <span id="cart-subtotal">0.00 €</span>
+                </div>
+                <div class="cart-line discount-line" id="discount-line" style="display: none;">
+                    <span>Réduction:</span>
+                    <span id="cart-discount">-0.00 €</span>
+                </div>
+                <div class="cart-total">
+                    <strong>Total:</strong>
+                    <strong><span id="cart-total">0.00</span> €</strong>
+                </div>
+            </div>
+            <button class="cta-button" id="checkout-btn">Passer commande</button>
+        </div>
+    </div>
+
+    <!-- Modal Favoris -->
+    <div class="modal" id="wishlist-modal">
+        <div class="modal-content">
+            <span class="close-modal close-wishlist">&times;</span>
+            <h2>Mes Favoris</h2>
+            <div id="wishlist-items"></div>
+        </div>
+    </div>
+
+    <!-- Modal Produit (avec galerie) -->
+    <div class="modal" id="product-modal">
+        <div class="modal-content product-modal-content">
+            <span class="close-modal close-product">&times;</span>
+            <div class="product-detail-grid">
+                <div class="product-gallery">
+                    <div class="main-image" id="main-product-image"></div>
+                    <div class="thumbnail-gallery" id="thumbnail-gallery"></div>
+                </div>
+                <div class="product-details">
+                    <div id="product-detail-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Comparateur -->
+    <div class="modal" id="compare-modal">
+        <div class="modal-content compare-modal-content">
+            <span class="close-modal close-compare">&times;</span>
+            <h2>Comparateur de Produits</h2>
+            <div id="compare-table"></div>
+        </div>
+    </div>
+
+    <!-- Modal Checkout -->
+    <div class="modal" id="checkout-modal">
+        <div class="modal-content checkout-modal-content">
+            <span class="close-modal close-checkout">&times;</span>
+            <h2>Finaliser la commande</h2>
+            <form id="checkout-form" class="checkout-form">
+                <div class="form-section">
+                    <h3>Informations personnelles</h3>
+                    <div class="form-row">
+                        <input type="text" name="firstName" placeholder="Prénom" required>
+                        <input type="text" name="lastName" placeholder="Nom" required>
+                    </div>
+                    <input type="email" name="email" placeholder="Email" required>
+                    <input type="tel" name="phone" placeholder="Téléphone" required>
+                </div>
+
+                <div class="form-section">
+                    <h3>Adresse de livraison</h3>
+                    <input type="text" name="address" placeholder="Adresse" required>
+                    <div class="form-row">
+                        <input type="text" name="city" placeholder="Ville" required>
+                        <input type="text" name="zipCode" placeholder="Code postal" required>
+                    </div>
+                    <input type="text" name="country" placeholder="Pays" value="France" required>
+                </div>
+
+                <div class="form-section">
+                    <h3>Mode de paiement</h3>
+                    <div class="payment-options">
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="card" checked>
+                            <span>💳 Carte bancaire</span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="paypal">
+                            <span>🅿️ PayPal</span>
+                        </label>
+                        <label class="payment-option">
+                            <input type="radio" name="payment" value="transfer">
+                            <span>🏦 Virement bancaire</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="checkout-summary">
+                    <h3>Récapitulatif</h3>
+                    <div id="checkout-items"></div>
+                    <div class="checkout-total">
+                        <strong>Total à payer:</strong>
+                        <strong><span id="checkout-total">0.00</span> €</strong>
+                    </div>
+                </div>
+
+                <button type="submit" class="cta-button">Confirmer la commande</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="chatbot" id="chatbot">
+        <div class="chatbot-header">
+            <span>💬 Assistant ForkShop</span>
+            <button class="chatbot-close" id="chatbot-close">✕</button>
+        </div>
+        <div class="chatbot-messages" id="chatbot-messages">
+            <div class="bot-message">
+                Bonjour ! Je suis votre assistant virtuel. Comment puis-je vous aider aujourd'hui ? 🍴
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <input type="text" id="chatbot-input-field" placeholder="Tapez votre message...">
+            <button id="chatbot-send">Envoyer</button>
+        </div>
+    </div>
+
+    <button class="chatbot-toggle" id="chatbot-toggle">
+        💬
+    </button>
+
+    <!-- Script original (mode offline) -->
+    <script src="script.js"></script>
+
+    <!-- Script avec API (mode online) - DÉSACTIVÉ pour éviter les conflits -->
+    <!-- <script src="api-script.js"></script> -->
+</body>
+</html>

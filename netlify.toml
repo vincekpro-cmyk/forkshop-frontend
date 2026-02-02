@@ -1,0 +1,9 @@
+# Configuration Netlify pour ForkShop
+
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
