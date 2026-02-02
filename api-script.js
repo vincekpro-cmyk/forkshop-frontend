@@ -552,9 +552,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // NOTE: On ne charge PAS les produits depuis l'API pour l'instant
-    // Le site fonctionne en mode hybride: produits en local, authentification via API
-    // await fetchProducts();
+    // Charger les produits depuis l'API backend
+    await fetchProducts();
 
     // Remplacer le gestionnaire de checkout
     const checkoutForm = document.getElementById('checkout-form');

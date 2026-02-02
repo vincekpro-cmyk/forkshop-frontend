@@ -874,8 +874,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.setAttribute('data-theme', 'dark');
     }
 
-    // Afficher les produits
-    displayProducts();
+    // Afficher les produits - DÉSACTIVÉ car api-script.js charge depuis l'API
+    // displayProducts();
 
     // Mettre à jour les compteurs
     updateCartCount();
