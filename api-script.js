@@ -1,16 +1,11 @@
 // ===== CONFIGURATION API =====
 const API_URL = 'https://forkshop-api.onrender.com/api';
 
-// ===== ÉTAT GLOBAL =====
+// ===== ÉTAT GLOBAL API =====
+// NOTE: On ne redéclare PAS cart, wishlist, etc. car script.js les déclare déjà
+// On utilise les variables globales de script.js (window.cart, window.wishlist, etc.)
 let currentUser = null;
 let authToken = localStorage.getItem('authToken') || null;
-let cart = [];
-let wishlist = [];
-let compareList = [];
-let currentFilter = 'all';
-let currentSort = 'default';
-let currentView = 'grid';
-let searchQuery = '';
 let appliedPromo = null;
 
 // Codes promo valides (maintenant aussi côté client pour validation)
@@ -140,22 +135,38 @@ async function fetchProducts() {
         let endpoint = '/products?';
         const params = [];
 
-        if (currentFilter !== 'all') {
-            params.push(`category=${currentFilter}`);
+        // Utiliser les variables globales de script.js
+        const filter = window.currentFilter || 'all';
+        const search = window.searchQuery || '';
+        const sort = window.currentSort || 'default';
+
+        if (filter !== 'all') {
+            params.push(`category=${filter}`);
         }
-        if (searchQuery) {
-            params.push(`search=${encodeURIComponent(searchQuery)}`);
+        if (search) {
+            params.push(`search=${encodeURIComponent(search)}`);
         }
-        if (currentSort !== 'default') {
-            params.push(`sort=${currentSort}`);
+        if (sort !== 'default') {
+            params.push(`sort=${sort}`);
         }
 
         endpoint += params.join('&');
 
         const data = await apiRequest(endpoint, { noAuth: true });
-        displayProducts(data.products);
+
+        // Mettre à jour la variable globale products de script.js
+        if (typeof window.products !== 'undefined') {
+            window.products = data.products;
+        }
+
+        // Appeler displayProducts de script.js (sans paramètres)
+        if (typeof window.displayProducts === 'function') {
+            window.displayProducts();
+        }
+
         return data.products;
     } catch (error) {
+        console.error('Erreur chargement produits API:', error);
         showNotification('Erreur lors du chargement des produits', 'error');
         return [];
     }
