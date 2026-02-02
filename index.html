@@ -433,11 +433,10 @@
         💬
     </button>
 
-    <!-- Script principal (mode offline - produits hardcodés) -->
-    <script src="script.js"></script>
+    <!-- Module API (namespace propre sans conflits) -->
+    <script src="forkshop-api.js"></script>
 
-    <!-- Script API DÉSACTIVÉ temporairement à cause de conflits de variables -->
-    <!-- Pour activer le backend, il faut refactoriser api-script.js -->
-    <!-- <script src="api-script.js"></script> -->
+    <!-- Script principal (utilise l'API si USE_API=true dans script.js) -->
+    <script src="script.js"></script>
 </body>
 </html>

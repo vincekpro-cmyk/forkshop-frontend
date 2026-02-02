@@ -1,7 +1,10 @@
+// ===== CONFIGURATION =====
+const USE_API = true; // true = charger depuis backend API, false = utiliser données hardcodées
+
 // ===== DONNÉES =====
 
-// Produits avec données enrichies
-const products = [
+// Produits avec données enrichies (utilisés si USE_API = false)
+let products = [
     {
         id: 1,
         name: "Fourchette Classic Inox",
@@ -235,11 +238,33 @@ function showNotification(message, type = 'success') {
 
 // ===== AFFICHAGE DES PRODUITS =====
 
+async function loadProductsFromAPI() {
+    if (!USE_API || !window.ForkShopAPI) {
+        return; // Utiliser produits hardcodés
+    }
+
+    try {
+        const apiProducts = await ForkShopAPI.fetchProducts({
+            category: currentFilter,
+            search: searchQuery,
+            sort: currentSort
+        });
+
+        // Mettre à jour la variable products avec les données de l'API
+        products = apiProducts;
+        displayProducts();
+    } catch (error) {
+        console.error('Erreur chargement produits API:', error);
+        showNotification('Erreur de chargement. Utilisation des données locales.', 'error');
+        // Garder les produits hardcodés en fallback
+    }
+}
+
 function displayProducts() {
     const productsGrid = document.getElementById('products-grid');
     productsGrid.innerHTML = '';
 
-    // Filtrer les produits
+    // Filtrer les produits (si pas déjà fait par l'API)
     let filteredProducts = products.filter(p => {
         const matchesFilter = currentFilter === 'all' || p.category === currentFilter;
         const matchesSearch = searchQuery === '' ||
@@ -867,15 +892,19 @@ function handleNewsletterSubmit(e) {
 
 // ===== INITIALISATION =====
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Charger le thème sauvegardé
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
         document.body.setAttribute('data-theme', 'dark');
     }
 
-    // Afficher les produits (mode offline avec données hardcodées)
-    displayProducts();
+    // Charger les produits (depuis API si USE_API=true, sinon hardcodés)
+    if (USE_API && window.ForkShopAPI) {
+        await loadProductsFromAPI();
+    } else {
+        displayProducts();
+    }
 
     // Mettre à jour les compteurs
     updateCartCount();
