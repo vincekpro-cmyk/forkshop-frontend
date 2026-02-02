@@ -243,20 +243,64 @@ async function loadProductsFromAPI() {
         return; // Utiliser produits hardcodés
     }
 
+    const productsGrid = document.getElementById('products-grid');
+
+    // Afficher skeleton pendant le chargement
+    if (window.AppState) {
+        AppState.showSkeleton('products-grid', 6);
+    }
+
     try {
-        const apiProducts = await ForkShopAPI.fetchProducts({
-            category: currentFilter,
-            search: searchQuery,
-            sort: currentSort
-        });
+        // Utiliser retry avec backoff pour la résilience
+        const apiProducts = window.AppState
+            ? await AppState.retryWithBackoff(async () => {
+                return await ForkShopAPI.fetchProducts({
+                    category: currentFilter,
+                    search: searchQuery,
+                    sort: currentSort
+                });
+            }, 3, 1000)
+            : await ForkShopAPI.fetchProducts({
+                category: currentFilter,
+                search: searchQuery,
+                sort: currentSort
+            });
 
         // Mettre à jour la variable products avec les données de l'API
         products = apiProducts;
+
+        // Cacher skeleton avant d'afficher
+        if (window.AppState) {
+            AppState.hideSkeleton('products-grid');
+        }
+
         displayProducts();
+
+        // Toast de succès si c'était après une erreur
+        if (window.AppState && !AppState.getState().apiHealthy) {
+            AppState.setState({ apiHealthy: true });
+            AppState.showToast('Connexion rétablie avec le serveur', 'success');
+        }
+
     } catch (error) {
         console.error('Erreur chargement produits API:', error);
-        showNotification('Erreur de chargement. Utilisation des données locales.', 'error');
-        // Garder les produits hardcodés en fallback
+
+        // Cacher skeleton en cas d'erreur
+        if (window.AppState) {
+            AppState.hideSkeleton('products-grid');
+            AppState.handleError(error, {
+                title: 'Erreur de chargement',
+                message: 'Impossible de charger les produits depuis le serveur. Utilisation des données locales.',
+                action: 'Réessayer',
+                onAction: loadProductsFromAPI
+            });
+            AppState.setState({ apiHealthy: false });
+        } else {
+            showNotification('Erreur de chargement. Utilisation des données locales.', 'error');
+        }
+
+        // Afficher les produits hardcodés en fallback
+        displayProducts();
     }
 }
 
@@ -372,7 +416,45 @@ function sortProducts(products) {
 
 // ===== PANIER =====
 
-function addToCart(productId) {
+async function addToCart(productId) {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    // Si API disponible et connecté, ajouter via API
+    if (USE_API && window.ForkShopAPI && ForkShopAPI.isAuthenticated()) {
+        try {
+            await ForkShopAPI.addToCart(productId, 1);
+
+            // Synchroniser le panier local avec l'API
+            const apiCart = await ForkShopAPI.getCart();
+            cart.length = 0;
+            cart.push(...apiCart);
+
+            updateCartCount();
+            displayCart();
+
+            if (window.AppState) {
+                AppState.showToast(`${product.name} ajouté au panier !`, 'success');
+            } else {
+                showNotification(`${product.name} ajouté au panier !`);
+            }
+        } catch (error) {
+            console.error('Erreur ajout au panier API:', error);
+
+            // Fallback sur panier local
+            addToCartLocal(productId);
+
+            if (window.AppState) {
+                AppState.showToast('Ajouté au panier local (hors ligne)', 'info');
+            }
+        }
+    } else {
+        // Mode offline ou non connecté
+        addToCartLocal(productId);
+    }
+}
+
+function addToCartLocal(productId) {
     const product = products.find(p => p.id === productId);
     if (product) {
         const existingItem = cart.find(item => item.id === productId);
@@ -383,7 +465,12 @@ function addToCart(productId) {
         }
         updateCartCount();
         saveToLocalStorage();
-        showNotification(`${product.name} ajouté au panier !`);
+
+        if (window.AppState) {
+            AppState.showToast(`${product.name} ajouté au panier !`, 'success');
+        } else {
+            showNotification(`${product.name} ajouté au panier !`);
+        }
     }
 }
 
@@ -481,21 +568,71 @@ function applyPromoCode() {
 
 // ===== WISHLIST =====
 
-function toggleWishlist(productId) {
+async function toggleWishlist(productId) {
+    const product = products.find(p => p.id === productId);
+    const index = wishlist.findIndex(item => item.id === productId);
+    const isRemoving = index !== -1;
+
+    // Si API disponible et connecté
+    if (USE_API && window.ForkShopAPI && ForkShopAPI.isAuthenticated()) {
+        try {
+            if (isRemoving) {
+                await ForkShopAPI.removeFromWishlist(productId);
+                wishlist.splice(index, 1);
+                if (window.AppState) {
+                    AppState.showToast(`${product.name} retiré des favoris`, 'info');
+                } else {
+                    showNotification(`${product.name} retiré des favoris`);
+                }
+            } else {
+                await ForkShopAPI.addToWishlist(productId);
+                wishlist.push(product);
+                if (window.AppState) {
+                    AppState.showToast(`${product.name} ajouté aux favoris`, 'success');
+                } else {
+                    showNotification(`${product.name} ajouté aux favoris`);
+                }
+            }
+
+            // Synchroniser avec l'API
+            const apiWishlist = await ForkShopAPI.getWishlist();
+            wishlist.length = 0;
+            wishlist.push(...apiWishlist);
+
+        } catch (error) {
+            console.error('Erreur wishlist API:', error);
+            // Fallback sur local
+            toggleWishlistLocal(productId);
+        }
+    } else {
+        // Mode offline
+        toggleWishlistLocal(productId);
+    }
+
+    updateWishlistCount();
+    saveToLocalStorage();
+    displayProducts();
+}
+
+function toggleWishlistLocal(productId) {
     const product = products.find(p => p.id === productId);
     const index = wishlist.findIndex(item => item.id === productId);
 
     if (index !== -1) {
         wishlist.splice(index, 1);
-        showNotification(`${product.name} retiré des favoris`);
+        if (window.AppState) {
+            AppState.showToast(`${product.name} retiré des favoris`, 'info');
+        } else {
+            showNotification(`${product.name} retiré des favoris`);
+        }
     } else {
         wishlist.push(product);
-        showNotification(`${product.name} ajouté aux favoris`);
+        if (window.AppState) {
+            AppState.showToast(`${product.name} ajouté aux favoris`, 'success');
+        } else {
+            showNotification(`${product.name} ajouté aux favoris`);
+        }
     }
-
-    updateWishlistCount();
-    saveToLocalStorage();
-    displayProducts(); // Rafraîchir pour mettre à jour les icônes
 }
 
 function updateWishlistCount() {
@@ -540,7 +677,11 @@ function toggleCompare(productId) {
         compareList.splice(index, 1);
     } else {
         if (compareList.length >= 4) {
-            showNotification('Maximum 4 produits pour la comparaison', 'error');
+            if (window.AppState) {
+                AppState.showToast('Maximum 4 produits pour la comparaison', 'warning', 3000);
+            } else {
+                showNotification('Maximum 4 produits pour la comparaison', 'error');
+            }
             return;
         }
         compareList.push(productId);
@@ -548,6 +689,7 @@ function toggleCompare(productId) {
 
     updateCompareButton();
     displayProducts();
+    saveToLocalStorage();
 }
 
 function updateCompareButton() {
@@ -697,7 +839,11 @@ function openProductModal(productId) {
 
 function openCheckout() {
     if (cart.length === 0) {
-        showNotification('Votre panier est vide', 'error');
+        if (window.AppState) {
+            AppState.showToast('Votre panier est vide', 'error');
+        } else {
+            showNotification('Votre panier est vide', 'error');
+        }
         return;
     }
 
@@ -739,24 +885,88 @@ function openCheckout() {
     checkoutModal.style.display = 'block';
 }
 
-function handleCheckoutSubmit(e) {
+async function handleCheckoutSubmit(e) {
     e.preventDefault();
 
-    // Simuler le traitement de la commande
-    showNotification('Commande confirmée ! Vous allez recevoir un email de confirmation.', 'success');
+    // Demander confirmation
+    if (window.AppState) {
+        const confirmed = await AppState.showConfirm(
+            'Confirmer votre commande ?',
+            'Vous allez passer commande et votre panier sera vidé.'
+        );
 
-    // Vider le panier
-    cart = [];
-    updateCartCount();
-    saveToLocalStorage();
+        if (!confirmed) return;
 
-    // Fermer le modal
-    closeModal('checkout-modal');
+        // Afficher loader pendant le traitement
+        AppState.showGlobalLoader('Traitement de votre commande...');
+    }
 
-    // Afficher un message de remerciement
-    setTimeout(() => {
-        showNotification('Merci pour votre commande ! 🎉', 'success');
-    }, 1000);
+    try {
+        // Si API disponible, créer commande via backend
+        if (USE_API && window.ForkShopAPI && ForkShopAPI.isAuthenticated()) {
+            const orderData = {
+                items: cart.map(item => ({
+                    productId: item.id,
+                    quantity: item.quantity,
+                    price: item.price
+                })),
+                promoCode: appliedPromo ? appliedPromo.code : null
+            };
+
+            const result = await ForkShopAPI.createOrder(orderData);
+
+            if (window.AppState) {
+                AppState.hideGlobalLoader();
+                AppState.showToast('Commande confirmée ! Numéro: ' + result.order.id, 'success', 5000);
+            } else {
+                showNotification('Commande confirmée !', 'success');
+            }
+
+        } else {
+            // Mode simulation (offline)
+            await new Promise(resolve => setTimeout(resolve, 1500)); // Simuler délai
+
+            if (window.AppState) {
+                AppState.hideGlobalLoader();
+                AppState.showToast('Commande confirmée ! Vous allez recevoir un email.', 'success');
+            } else {
+                showNotification('Commande confirmée !', 'success');
+            }
+        }
+
+        // Vider le panier
+        cart = [];
+        appliedPromo = null;
+        updateCartCount();
+        saveToLocalStorage();
+
+        // Fermer le modal
+        closeModal('checkout-modal');
+
+        // Message de remerciement
+        setTimeout(() => {
+            if (window.AppState) {
+                AppState.showToast('Merci pour votre commande ! 🎉', 'success');
+            } else {
+                showNotification('Merci pour votre commande ! 🎉', 'success');
+            }
+        }, 1000);
+
+    } catch (error) {
+        console.error('Erreur checkout:', error);
+
+        if (window.AppState) {
+            AppState.hideGlobalLoader();
+            AppState.handleError(error, {
+                title: 'Erreur de commande',
+                message: 'Impossible de finaliser la commande. Veuillez réessayer.',
+                action: 'Réessayer',
+                onAction: () => handleCheckoutSubmit(e)
+            });
+        } else {
+            showNotification('Erreur lors de la commande', 'error');
+        }
+    }
 }
 
 // ===== CHATBOT =====
@@ -886,13 +1096,37 @@ function initFAQ() {
 function handleNewsletterSubmit(e) {
     e.preventDefault();
     const email = e.target.querySelector('input[type="email"]').value;
-    showNotification(`Merci ! Vous êtes maintenant inscrit à notre newsletter (${email})`, 'success');
+
+    if (window.AppState) {
+        AppState.showToast(`✅ Inscription confirmée ! (${email})`, 'success', 4000);
+    } else {
+        showNotification(`Merci ! Vous êtes maintenant inscrit à notre newsletter (${email})`, 'success');
+    }
+
     e.target.reset();
 }
 
 // ===== INITIALISATION =====
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Initialiser AppState si disponible
+    if (window.AppState) {
+        AppState.init();
+
+        // Afficher un message si le site est offline
+        window.addEventListener('offline', () => {
+            AppState.showToast('⚠️ Vous êtes hors ligne. Certaines fonctionnalités sont limitées.', 'warning', 5000);
+        });
+
+        window.addEventListener('online', () => {
+            AppState.showToast('✅ Connexion rétablie !', 'success', 3000);
+            // Recharger les produits si API activée
+            if (USE_API && window.ForkShopAPI) {
+                loadProductsFromAPI();
+            }
+        });
+    }
+
     // Charger le thème sauvegardé
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
